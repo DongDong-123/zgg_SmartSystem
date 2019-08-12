@@ -5,10 +5,6 @@ from email.header import Header  # 定义邮件标题
 from email.mime.multipart import MIMEMultipart  #用于传送附件
 import os
 
-#发送邮件主题和内容
-subject='Web Selenium 附件发送测试'
-content='<html><h1 style="color:red">自动化测试报告!</h1></html>'
-
 
 class SendEmail:
     def __init__(self):
