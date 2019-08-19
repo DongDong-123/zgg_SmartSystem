@@ -35,6 +35,7 @@ def process_price(price):
 class Trademark:
     def __init__(self):
         self.timetemp = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+        self.driver = None
 
     # noinspection PyAttributeOutsideInit
     def trademark_list(self):
@@ -42,7 +43,7 @@ class Trademark:
         chrome_options.add_argument('--headless')
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
-        # self.driver = webself.driver.Chrome()
+        # self.driver = webdriver.Chrome()
         self.driver.maximize_window()
         # 进入列表页
         self.driver.get(ReadConfig().get_trademark_url())
@@ -60,19 +61,48 @@ class Trademark:
         print([self.goods_name, self.goods_type, self.goods_price])
 
         self.driver.find_element_by_xpath(".//div[@class='tm-mark-pro-item']/ul/li[{}]/a".format(num)).click()
+        # 进入详情页
         windows = self.driver.window_handles
         self.driver.switch_to.window(windows[-1])
         detail_title = self.driver.title
         print(detail_title)
-        self.goods_name2 = self.driver.find_element_by_xpath(".//div[@class='title']/h2").text
-        self.goods_type2 = self.driver.find_element_by_xpath(".//table[@class='tm-mark-detai-table']/tbody/tr[1]/td[2]").text
-        self.goods_price2 = self.driver.find_element_by_xpath(".//div[@class='tm-mark-detail-money']/div/span/em").text
-        print([self.goods_name2, self.goods_type2, self.goods_price2])
+        self.goods_detail_name = self.driver.find_element_by_xpath(".//div[@class='title']/h2").text
+        self.goods_detail_type = self.driver.find_element_by_xpath(".//table[@class='tm-mark-detai-table']/tbody/tr[1]/td[2]").text
+        self.goods_detail_price = self.driver.find_element_by_xpath(".//div[@class='tm-mark-detail-money']/div/span/em").text
+        print([self.goods_detail_name, self.goods_detail_type, self.goods_detail_price])
         global detail_url
         detail_url = self.driver.current_url
         print("打印", detail_url)
         self.driver.quit()
-        return [self.goods_name, self.goods_type, self.goods_price], [self.goods_name2, self.goods_type2, self.goods_price2]
+        return {
+            "goods_name": self.goods_name,
+            "goods_type": self.goods_type,
+            "goods_price": float(self.goods_price),
+            "goods_detail_name": self.goods_detail_name,
+            "goods_detail_type": self.goods_detail_type,
+            "goods_detail_price": float(self.goods_detail_price)
+        }
+    # 提交订单
+    def commit_order(self):
+        locator = (By.XPATH, "(//parent::li[div[@class='selected-b']])[1]")
+        WebDriverWait(self.driver, 30, 1).until(EC.element_to_be_clickable(locator))
+        case_name = self.driver.find_element_by_xpath("//tr[@class='tr-comm']/td[1]").text
+        case_number = self.driver.find_element_by_xpath("//tr[@class='tr-comm']/td[3]").text
+        case_price = self.driver.find_element_by_xpath("//tr[@class='tr-comm']/td[4]").text
+        totalprice = self.driver.find_element_by_xpath("//div[@class='totalPrice']/div/b").text
+        totalprice = process_price(totalprice)
+        self.driver.find_element_by_id('lnkPay').click()
+        # 返回价格
+        return case_name, case_number, case_price, totalprice
+
+    # 支付
+    def pay(self, windows):
+        pay_totalprice = self.driver.find_element_by_xpath("//div[@class='totalPrice']/div/b").text
+        self.driver.find_element_by_id('lnkPay').click()
+        self.driver.switch_to_window(windows[-1])
+        self.driver.find_element_by_xpath("//div[@class='wczfBtn']/input").click()
+        return process_price(pay_totalprice)
+
 
     def trademark_order(self):
         self.driver = front_login(ReadConfig().get_user(), ReadConfig().get_password())
@@ -83,7 +113,7 @@ class Trademark:
         print(self.driver.title)
         # 点击立即购买
         self.driver.find_element_by_xpath(".//div[@id='productId']/a[1]").click()
-
+        # 进入下单页
         locator_for_order = (By.XPATH, ".//tbody/tr[@class='tr-comm']/td[1]")
         WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator_for_order))
         # 提取商标信息
@@ -106,13 +136,14 @@ class Trademark:
 
         # 下单
         self.driver.find_element_by_xpath(".//a[@id='lnkPay']").click()
-
-        # 获取余额
-        get_balance = self.driver.find_element_by_xpath(".//div[@class='balance-radio']//span").text
-        get_balance = process_price(get_balance)
+        # 进入支付页面
+        # 获取可用余额
+        get_usable_balance = self.driver.find_element_by_xpath(".//div[@class='balance-radio']//span").text
+        get_usable_balance = process_price(get_usable_balance)
 
         # 选择余额支付
         # self.driver.find_element_by_xpath(".//div[@class='balance-radio']//span").click()
+
 
         # 已使用余额
         used_balance = self.driver.find_element_by_xpath(".//label[@id='lbbalance']").text
@@ -137,10 +168,12 @@ class Trademark:
         goods_pay_price3 = self.driver.find_element_by_xpath(".//div[@class='top']/b").text
         goods_pay_price3 = process_price(goods_pay_price3)
 
-        print([goods_pay_price1, goods_pay_for_balance, goods_pay_price2, goods_pay_price3, get_balance, used_balance])
+        print([goods_pay_price1, goods_pay_for_balance, goods_pay_price2, goods_pay_price3, get_usable_balance, used_balance])
 
         # 支付
         self.driver.find_element_by_xpath(".//a[@id='lnkPay']").click()
+
+        # 进入二维码页面
         # 判断支付总金额是否为0
         if float(goods_pay_price3):
             # 进入二维码页面
@@ -166,12 +199,12 @@ class Trademark:
 
         else:
             QR_price1, QR_price2 = 0, 0
-            sleep(0.5)
+            sleep(2)
             path = "screen/Sucess{}.png".format(self.timetemp)
             self.driver.save_screenshot(path)
 
             submit_status = self.driver.find_element_by_xpath(".//div[@class='comm']/p").text
-            self.driver.find_element_by_link_text(u"确定").click()
+            # self.driver.find_element_by_link_text(u"确定").click()
             print('submit_status', submit_status)
             self.driver.get("https://user.zgg.com/user/market/order.html")
 
@@ -180,29 +213,52 @@ class Trademark:
         WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator_for_case))
 
         # 获取案件信息
-        goods_order_number = self.driver.find_element_by_xpath(
+        center_order_number = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[1]/td/span[1]").text
         # goods_order_number = goods_order_number.replace("订单号：", "")
-        pay_state = self.driver.find_element_by_xpath(
+        center_pay_state = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[1]/td/span[3]").text
 
-        goods_name_in_case = self.driver.find_element_by_xpath(
+        center_goods_name = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td/span[1]").text
-        goods_name_in_case = goods_name_in_case.replace("商品名称:", "")
-        goods_type_in_case = self.driver.find_element_by_xpath(
+        center_goods_name = center_goods_name.replace("商品名称:", "")
+        center_goods_type = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td/span[2]").text
-        goods_type_in_case = goods_type_in_case.replace("商品分类:", "")
+        center_goods_type = center_goods_type.replace("商品分类:", "")
 
-        goods_case_code = self.driver.find_element_by_xpath(
+        center_case_code = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td/span[3]").text
-        goods_case_code = goods_case_code.replace("案件编号:", "").strip()
-        goods_case_price = self.driver.find_element_by_xpath(
+        center_case_code = center_case_code.replace("案件编号:", "").strip()
+        center_case_price = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td[4]/span").text
 
-        print([goods_order_number, pay_state, goods_name_in_case, goods_case_code, goods_case_price])
+        print([center_order_number, center_pay_state, center_goods_name, center_case_code, center_case_price])
 
-        return ([self.goods_name4, self.goods_type4, self.goods_price4, self.goods_code4, self.goods_offical4,
-              self.goods_total_price1, self.goods_total_price2, self.goods_total_price3], [QR_price1, QR_price2],
-            [goods_pay_price1, goods_pay_for_balance, goods_pay_price2, goods_pay_price3, get_balance, used_balance],
-            [goods_order_number, pay_state, goods_name_in_case, goods_type_in_case, goods_case_code, goods_case_price])
+        return {
+            "goods_order_name": self.goods_name4,
+            "goods_order_type": self.goods_type4,
+            "goods_order_price": float(self.goods_price4),
+            "goods_order_code": self.goods_code4,
+            "goods_offical4": float(self.goods_offical4),
+            "goods_order_total_price1": float(self.goods_total_price1),
+            "goods_order_total_price2": float(self.goods_total_price2),
+            "goods_order_total_price3": float(self.goods_total_price3),
+            "goods_QR_price1": float(QR_price1),
+            "goods_QR_price2": float(QR_price2),
+            "goods_pay_price1": float(goods_pay_price1),
+            "goods_pay_for_balance": float(goods_pay_for_balance),
+            "goods_pay_price2": float(goods_pay_price2),
+            "goods_pay_price3": float(goods_pay_price3),
+            "get_usable_balance": float(get_usable_balance),
+            "used_balance": float(used_balance),
+            "center_order_number": center_order_number,
+            "center_pay_state": center_pay_state,
+            "center_goods_name": center_goods_name,
+            "center_goods_type": center_goods_type,
+            "center_case_code": center_case_code,
+            "center_case_price": float(center_case_price)
+        }
 
+    # 案件中心
+    # def case_centre(self):
+    #     self.driver.find_element_by_xpath("")
