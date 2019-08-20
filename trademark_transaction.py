@@ -6,30 +6,7 @@ import random
 import re
 from front_login import *
 import time
-import HTMLTestRunner
-import HtmlTestRunner
-from HTMLTestRunner_PY3 import HTMLTestRunner
-
-
-# 处理价格
-def process_price(price):
-    if isinstance(price, str):
-        if "面议" in price:
-            return 0
-        elif '￥' or '¥' or '元' in price:
-            patt = "['￥','¥','元']"
-            return re.sub(patt, "", price)
-        else:
-            try:
-                eval(price)
-                return price
-            except SyntaxError as e:
-                print("价格错误：", e)
-                return 0
-    elif isinstance(price, float):
-        return price
-    elif isinstance(price, int):
-        return price
+from Common_func import *
 
 
 class Trademark:
@@ -76,10 +53,10 @@ class Trademark:
         self.driver.quit()
         return {
             "goods_name": self.goods_name,
-            "goods_type": self.goods_type,
+            "goods_type": process_type(self.goods_type),
             "goods_price": float(self.goods_price),
             "goods_detail_name": self.goods_detail_name,
-            "goods_detail_type": self.goods_detail_type,
+            "goods_detail_type": process_type(self.goods_detail_type),
             "goods_detail_price": float(self.goods_detail_price)
         }
     # 提交订单
@@ -152,8 +129,10 @@ class Trademark:
 
         # 选择支付宝支付
         self.driver.find_element_by_xpath(".//div[@id='zfbzf']/a[@dataid='1']").click()
+        pay_state = "支付宝"
         # 选择微信支付
         # self.driver.find_element_by_xpath(".//div[@id='zfbzf']/a[@dataid='4']").click()
+        # pay_state = "微信"
 
         # 获取所有显示价格
         goods_pay_price1 = self.driver.find_element_by_xpath(".//div[@class='fwfBox']/div/div[1]/em").text
@@ -182,6 +161,7 @@ class Trademark:
 
             path = "screen/screen{}.png".format(self.timetemp)
             # 等待二维码加载
+            time.sleep(3)
             locator_for_QR = (By.XPATH, "//canvas")
             WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator_for_QR))
 
@@ -229,14 +209,99 @@ class Trademark:
         center_case_code = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td/span[3]").text
         center_case_code = center_case_code.replace("案件编号:", "").strip()
+        # 交易状态
+        center_case_trade_state = self.driver.find_element_by_xpath(
+            ".//div[@class='zc-case-table']/table[2]/tbody[1]/tr[2]/td[3]/div[@class='proess']").text
         center_case_price = self.driver.find_element_by_xpath(
             ".//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td[4]/span").text
-
         print([center_order_number, center_pay_state, center_goods_name, center_case_code, center_case_price])
+
+        # 商标详情
+        self.driver.find_element_by_xpath(
+            ".//table[@class='zc-payment-comm']/tbody/tr[2]/td[2]/a[1]").click()
+        windows = self.driver.window_handles
+        self.driver.switch_to.window(windows[-1])
+        goods_detail_name2 = self.driver.find_element_by_xpath(".//div[@class='title']/h2").text
+        goods_trade_state = self.driver.find_element_by_xpath(".//div[@class='tm-mark-detail-money']/div/span[1]").text
+        print("交易状态", goods_trade_state)
+        print("goods_detail_name2", goods_detail_name2)
+        self.driver.switch_to.window(windows[0])
+        # self.driver.close()
+
+        # 订单详情
+        self.driver.find_element_by_xpath(".//div[@class='zc-case-table']/table[2]//td[@class='same pay']/a[2]").click()
+        windows = self.driver.window_handles
+        self.driver.switch_to.window(windows[-1])
+        time.sleep(1)
+        # 支付方式，处理后类型float
+        time.sleep(1)
+
+        # locator_for_detail = (By.XPATH, ".//div[@class='caseComm']/div[1]/p[2]")
+        # WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator_for_detail))
+
+        order_detail_pay_state = self.driver.find_element_by_xpath(
+            ".//div[@class='caseComm']/div[1]/p[2]").text
+        order_detail_pay_state = process_order_infos(order_detail_pay_state)
+        # order_detail_pay_state = "支付宝"
+        # 总费用，处理后类型float
+        order_detail_total_price = self.driver.find_element_by_xpath(
+            ".//div[@class='caseComm']/div[1]/p[3]/span").text
+        order_detail_total_price = turn_to_float(get_price(order_detail_total_price)[0])
+        # 红包支付金额,处理后类型float
+        order_detail_red_packet = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[1]/p[4]").text
+        order_detail_red_packet = turn_to_float(get_price(order_detail_red_packet)[0])
+        # 余额支付,处理后类型float
+        order_detail_balance_pay = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[1]/p[5]").text
+        order_detail_balance_pay = turn_to_float(get_price(order_detail_balance_pay)[0])
+        # 应付总额，处理后类型float
+        order_detail_should_total = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[1]/p[6]").text
+        print("总额", order_detail_should_total)
+        all_price = get_price(order_detail_should_total)
+        print("所有价格", all_price)
+        order_detail_should_total = turn_to_float(all_price[0])
+        # 总费用
+        order_detail_should_total_all = turn_to_float(all_price[1])
+        # 红包支付金额
+        order_detail_should_total_red = turn_to_float(all_price[2])
+        # 余额支付金额
+        order_detail_should_total_balance = turn_to_float(all_price[3])
+        # 应付总额2
+        order_detail_should_total2 = turn_to_float(all_price[4])
+
+        # 付款时间
+        order_detail_pay_time = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[1]/p[8]").text
+        order_detail_pay_time = process_order_infos(order_detail_pay_time)
+        aa = {
+            "order_detail_total_price": order_detail_total_price,
+            "order_detail_red_packet": order_detail_red_packet,
+            "order_detail_balance_pay": order_detail_balance_pay,
+            "order_detail_should_total": order_detail_should_total,
+            "order_detail_should_total_all": order_detail_should_total_all,
+            "order_detail_should_total_red": order_detail_should_total_red,
+            "order_detail_should_total_balance": order_detail_should_total_balance,
+            "order_detail_should_total2": order_detail_should_total2,
+            "order_detail_pay_time": order_detail_pay_time
+        }
+        print("订单详情", aa)
+        # 收件人
+        order_detail_receiver = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[2]/p[2]").text
+        order_detail_receiver = process_order_infos(order_detail_receiver)
+        # 收件地址
+        order_detail_receive_address = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[2]/p[3]").text
+        order_detail_receive_address = process_order_infos(order_detail_receive_address)
+        # 手机号
+        order_detail_receive_phone = self.driver.find_element_by_xpath(".//div[@class='caseComm']/div[2]/p[4]").text
+        order_detail_receive_phone = process_order_infos(order_detail_receive_phone)
+        bb = {
+            "order_detail_receiver": order_detail_receiver,
+            "order_detail_receive_address": order_detail_receive_address,
+            "order_detail_receive_phone": order_detail_receive_phone
+        }
+        print("收件信息", bb)
 
         return {
             "goods_order_name": self.goods_name4,
-            "goods_order_type": self.goods_type4,
+            "goods_order_type": process_type(self.goods_type4),
             "goods_order_price": float(self.goods_price4),
             "goods_order_code": self.goods_code4,
             "goods_offical4": float(self.goods_offical4),
@@ -251,12 +316,30 @@ class Trademark:
             "goods_pay_price3": float(goods_pay_price3),
             "get_usable_balance": float(get_usable_balance),
             "used_balance": float(used_balance),
+            "pay_state": pay_state,
             "center_order_number": center_order_number,
             "center_pay_state": center_pay_state,
             "center_goods_name": center_goods_name,
             "center_goods_type": center_goods_type,
             "center_case_code": center_case_code,
-            "center_case_price": float(center_case_price)
+            "center_case_price": float(center_case_price),
+
+            "goods_trade_state": goods_trade_state,
+            "goods_detail_name2": goods_detail_name2,
+
+            "order_detail_pay_state": order_detail_pay_state,
+            "order_detail_total_price": order_detail_total_price,
+            "order_detail_red_packet": order_detail_red_packet,
+            "order_detail_balance_pay": order_detail_balance_pay,
+            "order_detail_should_total": order_detail_should_total,
+            "order_detail_should_total_all": order_detail_should_total_all,
+            "order_detail_should_total_red": order_detail_should_total_red,
+            "order_detail_should_total_balance": order_detail_should_total_balance,
+            "order_detail_should_total2": order_detail_should_total2,
+            "order_detail_receiver": order_detail_receiver,
+            "order_detail_receive_address": order_detail_receive_address,
+            "order_detail_receive_phone": order_detail_receive_phone
+
         }
 
     # 案件中心
