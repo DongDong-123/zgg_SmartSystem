@@ -26,8 +26,12 @@ def process_price(price):
 
 
 def check_rasult(driver):
-    result = driver.find_element_by_xpath("(.//div[@class='them-edit-dialog']/div[@class='comm']/p)").text
+    result = driver.find_elements_by_xpath("(.//div[@class='comm']/p)")[0]
+    print(result)
+    # result = result[0]
+    result = result.text
     print("result", result, type(result))
+
     if "您的查询资料已提交" in result:
         response = "True"
     else:
@@ -48,7 +52,7 @@ def process_order_infos(elem):
     patten = ".*?：(.*)"
     result = re.search(patten, elem)
     if result:
-        return result.group()
+        return result.group(1)
     else:
         return None
 
@@ -67,6 +71,9 @@ def turn_to_float(elem):
 
 
 if __name__ == "__main__":
-    elem = "应付总额：¥0.0【23450.00(总费用) - 0.00(红包) - 23450.00(余额)=0.00】"
+    # elem = "应付总额：¥0.0【23450.00(总费用) - 0.00(红包) - 23450.00(余额)=0.00】"
     # elem = "总费用：¥"
-    print(get_price(elem))
+    # print(get_price(elem))
+    strs = '付款方式：支付宝'
+    aa = process_order_infos(strs)
+    print(aa)

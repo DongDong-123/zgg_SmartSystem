@@ -8,9 +8,7 @@ goods_order = Trademark().trademark_order()
 
 
 class TestListToDetail(unittest.TestCase):
-    """此用例包含20个用例，测试商标交易列表页、详情页、下单页、交易管理页面商标信息是否正确"""
-    goods_infos = Trademark().trademark_list()
-    goods_order = Trademark().trademark_order()
+    """此用例包含38个用例，测试商标交易列表页、详情页、下单页、交易管理页面商标信息是否正确"""
 
     def setUp(self):
         print("begin the Test")
@@ -20,20 +18,59 @@ class TestListToDetail(unittest.TestCase):
     # def tearDown(self):
     #     print("do something after test : clean up ")
 
+    def test_name_frame_list(self):
+        """# 30 测试列表页提交报价中商标名称和列表页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_name"), self.goods_infos.get("list_goods_name"))
+
+    def test_type_frame_list(self):
+        """# 31 测试列表页提交报价中商标名称和列表页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_type"), self.goods_infos.get("list_goods_type"))
+
+    def test_price_frame_list(self):
+        """# 32 测试列表页提交报价中商标名称和列表页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_price"), self.goods_infos.get("list_goods_price"))
+
+    def test_deadline_frame_list(self):
+        """# 33 测试列表页提交报价中有效期限和列表页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_deadline"),
+                         self.goods_infos.get("goods_detail_deadline"))
+
+    def test_send_result_list(self):
+        """# 34 测试提交报价是否发送成功"""
+        self.assertEqual(self.goods_infos.get("send_result"), True)
+
+    def test_name_frame_detail(self):
+        """# 35 测试列表页提交报价中商标名称和详情页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_name"), self.goods_infos.get("goods_detail_name"))
+
+    def test_type_frame_detail(self):
+        """# 36 测试列表页提交报价中商标名称和详情页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_type"), self.goods_infos.get("goods_detail_type"))
+
+    def test_price_frame_detail(self):
+        """# 37 测试列表页提交报价中商标名称和详情页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_price"), self.goods_infos.get("goods_detail_price"))
+
+    def test_deadline_frame_detail(self):
+        """# 38 测试列表页提交报价中有效期限和详情页中是否一致"""
+        self.assertEqual(self.goods_infos.get("frame_goods_deadline"),
+                         self.goods_infos.get("goods_detail_deadline"))
+
+
     # 1
     def test_name_list_to_detail(self):
         """用例1：测试列表页名称与详情页名称是否一致"""
-        self.assertEqual(self.goods_infos.get("goods_name"), self.goods_infos.get("goods_detail_name"))
+        self.assertEqual(self.goods_infos.get("list_goods_name"), self.goods_infos.get("goods_detail_name"))
 
     # 2
     def test_type_list_to_detail(self):
         """用例2：测试列表页大类与详情页大类是否一致"""
-        self.assertEqual(self.goods_infos.get("goods_type"), self.goods_infos.get("goods_detail_type"))
+        self.assertEqual(self.goods_infos.get("list_goods_type"), self.goods_infos.get("goods_detail_type"))
 
     # 3
     def test_price_list_to_detail(self):
         """用例3：测试列表页价格与详情页价格是否一致"""
-        self.assertEqual(self.goods_infos.get("goods_price"), self.goods_infos.get("goods_detail_price"))
+        self.assertEqual(self.goods_infos.get("list_goods_price"), self.goods_infos.get("goods_detail_price"))
 
     # 4
     def test_name_detail_to_order(self):
@@ -111,7 +148,7 @@ class TestListToDetail(unittest.TestCase):
     # 17
     def test_caseinfo_for_name(self):
         """用例17：测试商标名称是否与列表页一致"""
-        self.assertEqual(self.goods_order.get("center_goods_name"), self.goods_infos.get("goods_name"))
+        self.assertEqual(self.goods_order.get("center_goods_name"), self.goods_infos.get("list_goods_name"))
 
     # 18
     def test_caseinfo_for_type(self):
@@ -129,46 +166,47 @@ class TestListToDetail(unittest.TestCase):
         self.assertEqual(self.goods_order.get("center_case_price"), self.goods_order.get("goods_pay_price1"))
 
     # 案件管理-商标详情
-    # 20
+    # 21
     def test_caseinfo_for_case_state(self):
-        """用例20：测试商标详情页商标状态是否为交易中……"""
+        """用例21：测试商标详情页商标状态是否为交易中……"""
         self.assertEqual(self.goods_order.get("goods_trade_state"), "商品交易中...")
 
-    # 20
+    # 22
     def test_caseinfo_for_case_name(self):
-        """用例20：测试案件中心案件商标名称是否与商标详情页一致"""
+        """用例22：测试案件中心案件商标名称是否与商标详情页一致"""
         self.assertEqual(self.goods_order.get("goods_detail_name2"), self.goods_order.get("center_goods_name"))
 
     # 订单详情
-    # 20
+    # 23
     def test_order_detail_pay_state(self):
-        """用例20：测试订单详情页支付方式是否与支付页选择一致"""
+        """用例23：测试订单详情页支付方式是否与支付页选择一致"""
         self.assertEqual(self.goods_order.get("order_detail_pay_state"), self.goods_order.get("pay_state"))
 
-    # 20
+    # 24
     def test_order_detail_total_price(self):
-        """用例20：测试订单详情总费用是否与下单页总费用一致"""
+        """用例24：测试订单详情总费用是否与下单页总费用一致"""
         self.assertEqual(self.goods_order.get("order_detail_total_price"), self.goods_order.get("goods_pay_price3"))
 
-    # 20
+    # 25
     def test_order_detail_used_balance(self):
-        """用例20：测试订单详情页余额支付金额是否与支付页余额支付金额一致"""
+        """用例25：测试订单详情页余额支付金额是否与支付页余额支付金额一致"""
         self.assertEqual(self.goods_order.get("order_detail_balance_pay"), self.goods_order.get("used_balance"))
-
+    # 26
     def test_order_detail_should_pay(self):
-        """用例20：测试订单详情页应付总额是否与支付页应付总额一致"""
+        """用例26：测试订单详情页应付总额是否与支付页应付总额一致"""
         self.assertEqual(self.goods_order.get("order_detail_should_total"), self.goods_order.get("goods_pay_price3"))
-
+    # 27
     def test_order_detail_total_pay(self):
-        """用例20：测试订单详情页总费用是否与应付总额中总费用一致"""
+        """用例27：测试订单详情页总费用是否与应付总额中总费用一致"""
         self.assertEqual(self.goods_order.get(
             "order_detail_total_price"), self.goods_order.get("order_detail_should_total_all"))
-
+    # 28
     def test_order_detail_shoud_total_pay(self):
-        """用例20：测试订单详情页应付总额与总费用-红包-余额支付，计算出的金额是否相同"""
-        self.assertEqual(self.goods_order.get("order_detail_should_total2"), self.goods_order.get("order_detail_should_total"))
-
+        """用例28：测试订单详情页应付总额与总费用-红包-余额支付，计算出的金额是否相同"""
+        self.assertEqual(self.goods_order.get("order_detail_should_total2"), 
+                         self.goods_order.get("order_detail_should_total"))
+    # 29
     def test_order_detail_pay_time(self):
-        """用例20：测试订单详情页余额支付金额是否与支付页余额支付金额一致"""
+        """用例29：测试订单详情页余额支付金额是否与支付页余额支付金额一致"""
         self.assertEqual(self.goods_order.get("order_detail_balance_pay"), self.goods_order.get("used_balance"))
 
