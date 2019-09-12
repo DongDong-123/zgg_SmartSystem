@@ -77,7 +77,7 @@ class Trademark:
                   "frame_goods_price": frame_goods_price,
               })
 
-        your_name = "张三"
+        your_name = "技术测试"
         your_phone = "16619923387"
         your_price = '2000'
         self.driver.find_element_by_xpath(".//div[@class='speical-box']/div[2]/input").send_keys(your_phone)
@@ -86,7 +86,15 @@ class Trademark:
         time.sleep(1)
         # 提交
         self.driver.find_element_by_xpath(".//div[@class='offer-sure']/a").click()
-        result = check_rasult(self.driver)
+        time.sleep(1)
+        result = self.driver.find_elements_by_xpath("(.//div[@class='them-edit-dialog']/div[@class='comm']/p)")[0]
+        result = result.text
+        # print("result", result, type(result))
+        if "您的查询资料已提交" in result:
+            response = True
+        else:
+            response = False
+
         time.sleep(0.5)
         self.driver.save_screenshot("screen\发送结果{}.png".format(self.timetemp))
         time.sleep(0.5)
@@ -146,7 +154,7 @@ class Trademark:
             "frame_goods_suit": frame_goods_suit,
             "frame_goods_deadline": frame_goods_deadline,
             "frame_goods_price": float(frame_goods_price),
-            "send_result": result,
+            "send_result": response,
             "goods_detail_name": goods_detail_name,
             "goods_detail_type": goods_detail_type,
             "goods_detail_price": float(goods_detail_price),

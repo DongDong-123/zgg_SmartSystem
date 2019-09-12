@@ -25,19 +25,6 @@ def process_price(price):
         raise ValueError
 
 
-def check_rasult(driver):
-    result = driver.find_elements_by_xpath("(.//div[@class='comm']/p)")[0]
-    print(result)
-    # result = result[0]
-    result = result.text
-    print("result", result, type(result))
-
-    if "您的查询资料已提交" in result:
-        response = "True"
-    else:
-        response = "False"
-    return response
-
 # 处理分类，只取分类号
 def process_type(elem):
     patten = "(\d+)"

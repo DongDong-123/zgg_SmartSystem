@@ -51,7 +51,6 @@ class ReadConfig:
     def get_trademark_url(self):
         return self.cfg.get("URL", "TRADEMAEK")
 
-
     def login_page(self):
         return self.cfg.get("URL", "LOGIN_PAGE")
 
