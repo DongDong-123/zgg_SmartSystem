@@ -18,6 +18,7 @@ class Trademark:
     def __init__(self):
         self.timetemp = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
         self.driver = driver
+        self.trade_manage_url = "https://user.zgg.com/user/market/order.html"
 
     # noinspection PyAttributeOutsideInit
     def trademark_list(self):
@@ -183,7 +184,6 @@ class Trademark:
     #     self.driver.find_element_by_xpath("//div[@class='wczfBtn']/input").click()
     #     return process_price(pay_totalprice)
 
-
     def trademark_order(self):
         self.driver = front_login(ReadConfig().get_user(), ReadConfig().get_password())
         self.driver.get(detail_url)
@@ -289,7 +289,7 @@ class Trademark:
             submit_status = self.driver.find_element_by_xpath(".//div[@class='comm']/p").text
             # self.driver.find_element_by_link_text(u"确定").click()
             print('submit_status', submit_status)
-            self.driver.get("https://user.zgg.com/user/market/order.html")
+            self.driver.get(self.trade_manage_url)
 
         # 进入个人中心，等待页面加载完毕
         locator_for_case = (By.XPATH, "//div[@class='zc-case-table']/table[@class='zc-payment-comm']//tr[2]/td[2]/a[1]")
@@ -401,7 +401,42 @@ class Trademark:
             "order_detail_receive_phone": order_detail_receive_phone
         }
         print("收件信息", bb)
-        self.driver.quit()
+        # self.driver.quit()
+
+        # 删除订单
+        self.driver.back()
+        locator = (By.LINK_TEXT, u'删除')
+        # 等待页面加载完毕
+        WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator))
+        # # 读取订单号
+        # order_number = self.driver.find_element_by_xpath("//tr[@class='tit-bt']/td[1]/span[1]").text
+        # # 多个案件一个订单，只获取到了第一个案件号
+        case_name = self.driver.find_element_by_xpath("//tr/td[@class='name name-title']/span[1]").text
+        # case_number = self.driver.find_element_by_xpath("//tr/td[@class='name name-title']/span[3]").text
+        # case_number = case_number.replace(" ", "")
+        # print("order_number", order_number)
+        print("case_info", case_name)
+        # print("case_info", case_number)
+        self.driver.find_element_by_xpath("(.//tr/td[@class='delete-btn']/a)[1]").click()
+        # self.driver.find_element_by_link_text(u"删除").click()
+        # self.driver.switch_to_alert()
+        time.sleep(1)
+        # self.driver.find_element_by_link_text(u"确定").click()
+        # 必须等一会，才能获取弹框
+        sleep(1)
+        try:
+            # 关闭弹框
+            aler = self.driver.switch_to.alert
+            delete_staus = aler.text
+            print('delete_staus', delete_staus)
+            aler.accept()
+            time.sleep(1)
+            self.driver.refresh()
+            # 存储
+        except Exception as e:
+            print(e)
+            self.driver.refresh()  # 刷新页面
+
         return {
             "goods_order_name": self.goods_name4,
             "goods_order_type": process_type(self.goods_type4),
@@ -444,7 +479,3 @@ class Trademark:
             "order_detail_receive_phone": order_detail_receive_phone
 
         }
-
-    # 案件中心
-    # def case_centre(self):
-    #     self.driver.find_element_by_xpath("")
