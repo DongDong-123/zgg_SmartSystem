@@ -10,7 +10,7 @@ from Common_func import *
 from selenium.webdriver.common.action_chains import ActionChains
 
 num = random.randint(1, 20)  # 随机选择一个商标
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(r"C:\Users\Dong\AppData\Local\Google\Chrome\Application\chromedriver.exe")
 driver.maximize_window()
 
 

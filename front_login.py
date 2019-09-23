@@ -12,7 +12,7 @@ def front_login(username, password):
     # chrome_options.add_argument('--headless')
     # driver = webdriver.Chrome(chrome_options=chrome_options)
 
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(r"C:\Users\Dong\AppData\Local\Google\Chrome\Application\chromedriver.exe")
 
     driver.maximize_window()
 
