@@ -421,7 +421,8 @@ class Trademark:
         # self.driver.quit()
 
         # 删除订单
-        self.driver.back()
+        self.driver.get(ReadConfig().get_order_list())
+
         locator = (By.LINK_TEXT, u'删除')
         # 等待页面加载完毕
         WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator))

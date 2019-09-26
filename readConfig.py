@@ -54,6 +54,9 @@ class ReadConfig:
     def login_page(self):
         return self.cfg.get("URL", "LOGIN_PAGE")
 
+    def get_order_list(self):
+        return self.cfg.get("URL", "ORDER_LIST")
+
 
 class SendEmailConfig:
     def __init__(self):
