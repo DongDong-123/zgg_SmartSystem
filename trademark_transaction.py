@@ -8,9 +8,26 @@ from front_login import *
 import time
 from Common_func import *
 from selenium.webdriver.common.action_chains import ActionChains
+import platform
+from selenium.webdriver.chrome.options import Options
+
 
 num = random.randint(1, 20)  # 随机选择一个商标
-driver = webdriver.Chrome(r"C:\Users\Dong\AppData\Local\Google\Chrome\Application\chromedriver.exe")
+if 'Windows' in platform.system():
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    driver = webdriver.Chrome(r"C:\Users\Dong\AppData\Local\Google\Chrome\Application\chromedriver.exe", chrome_options=chrome_options)
+elif 'Linux' in platform.system():
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    driver = webdriver.Chrome('/opt/google/chrome/chromedriver', chrome_options=chrome_options)
+
+else:
+    raise SystemError("系统错误！")
+
+# driver = webdriver.Chrome(r"C:\Users\Dong\AppData\Local\Google\Chrome\Application\chromedriver.exe")
 driver.maximize_window()
 
 

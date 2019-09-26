@@ -7,14 +7,19 @@ from selenium.webdriver.common.action_chains import ActionChains
 import re
 from front_login import *
 import time
-from Common_func import process_price, check_rasult, process_type
+from Common_func import process_price, process_type
 
 
 num = random.randint(1, 20)  # 随机选择一个商标
 
-
-driver = webdriver.Chrome()
-
+# ----------------------------------------------------------
+# 服务器集成Jenkins的配置
+from selenium.webdriver.chrome.options import Options
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+driver = webdriver.Chrome('/opt/google/chrome/chromedriver', chrome_options=chrome_options)
+# ----------------------------------------------------------
 
 class Send_Clue:
     def __init__(self):
