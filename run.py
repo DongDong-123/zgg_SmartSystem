@@ -14,7 +14,7 @@ def begin():
     timetemp = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     report_title = '商标交易用例执行报告'
     desc = '商标交易'
-    report_file = 'reports/{}_{}.html'.format(report_title, timetemp)
+    report_file = './reports/{}_{}.html'.format(report_title, timetemp)
     with open(report_file, 'wb') as report:
         runner = HTMLTestRunner(stream=report, title=report_title, description=desc, verbosity=2)
         runner.run(suite)
