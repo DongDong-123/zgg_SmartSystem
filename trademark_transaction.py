@@ -283,7 +283,7 @@ class Trademark:
             # 等待二维码加载
             time.sleep(3)
             locator_for_QR = (By.XPATH, "//canvas")
-            WebDriverWait(self.driver, 30, 0.5).until(EC.element_to_be_clickable(locator_for_QR))
+            WebDriverWait(self.driver, 50, 0.5).until(EC.element_to_be_clickable(locator_for_QR))
 
             QR_price1 = self.driver.find_element_by_xpath(".//span[@id='J_basePriceArea']/strong").text
             QR_price2 = self.driver.find_element_by_xpath(".//div[@class='qrcode-header']/div[2]").text
