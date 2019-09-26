@@ -287,6 +287,7 @@ class Trademark:
 
             QR_price1 = self.driver.find_element_by_xpath(".//span[@id='J_basePriceArea']/strong").text
             QR_price2 = self.driver.find_element_by_xpath(".//div[@class='qrcode-header']/div[2]").text
+            print("QR_price1", QR_price1, "QR_price2", QR_price2)
 
             # 截图
             self.driver.save_screenshot(path)
